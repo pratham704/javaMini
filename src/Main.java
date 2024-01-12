@@ -1,16 +1,14 @@
 // Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
 // then press Enter. You can now see whitespace characters in your code.
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
         // Press Alt+Enter with your caret at the highlighted text to see how
         // IntelliJ IDEA suggests fixing it.
-        QuizQuestion[] questions = {
-                new QuizQuestion("What is the capital of France?", new String[]{"Berlin", "Paris", "Madrid"}, 2),
-                new QuizQuestion("Which planet is known as the Red Planet?", new String[]{"Earth", "Mars", "Jupiter"}, 2),
-                new QuizQuestion("What is the largest mammal?", new String[]{"Elephant", "Whale", "Lion"}, 2)
-        };
+        QuizQuestion[] questions = loadQuestionsFromFile("src/questions.txt");
 
         // Press Shift+F10 or click the green arrow button in the gutter to run the code.
         for (QuizQuestion question : questions) {
@@ -32,6 +30,47 @@ public class Main {
         }
 
         System.out.println("Quiz game completed!");
+    }
+
+    private static QuizQuestion[] loadQuestionsFromFile(String fileName) {
+        try {
+            Scanner fileScanner = new Scanner(new File(fileName));
+            int numberOfQuestions = countLines(fileName);
+            QuizQuestion[] questions = new QuizQuestion[numberOfQuestions];
+
+            for (int i = 0; i < numberOfQuestions; i++) {
+                String line = fileScanner.nextLine();
+                String[] parts = line.split(";");
+                String question = parts[0];
+                String[] options = parts[1].split(",");
+                int correctOption = Integer.parseInt(parts[2]);
+
+                questions[i] = new QuizQuestion(question, options, correctOption);
+            }
+
+            return questions;
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found: " + fileName);
+            return new QuizQuestion[0];
+        }
+    }
+
+    private static int countLines(String fileName) {
+        try {
+            Scanner fileScanner = new Scanner(new File(fileName));
+            int count = 0;
+
+            while (fileScanner.hasNextLine()) {
+                fileScanner.nextLine();
+                count++;
+            }
+
+            fileScanner.close();
+            return count;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 }
 
