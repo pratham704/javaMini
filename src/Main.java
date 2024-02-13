@@ -1,24 +1,24 @@
-// Press Shift twice to open the Search Everywhere dialog and type `show whitespaces`,
-// then press Enter. You can now see whitespace characters in your code.
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        // Press Alt+Enter with your caret at the highlighted text to see how
-        // IntelliJ IDEA suggests fixing it.
+        String apiUrl = "http://localhost:8080/data/questions";
+
+        fetchAndStoreQuestions(apiUrl);
+
         QuizQuestion[] questions = loadQuestionsFromFile("src/questions.txt");
-
-        // Press Shift+F10 or click the green arrow button in the gutter to run the code.
+        System.out.println();
+        System.out.println();
+        System.out.println("Successfully loaded to Questions.txt , Via api");
+        System.out.println();
+        System.out.println();
         for (QuizQuestion question : questions) {
-
-            // Press Shift+F9 to start debugging your code. We have set one breakpoint
-            // for you, but you can always add more by pressing Ctrl+F8.
             question.start();
 
             try {
-                // Give a time limit for answering each question (e.g., 10 seconds)
                 question.join(10000);
 
                 if (!question.isAnswered()) {
@@ -32,49 +32,73 @@ public class Main {
         System.out.println("Quiz game completed!");
     }
 
+    private static void fetchAndStoreQuestions(String apiUrl) {
+        try {
+            URL url = new URL(apiUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuilder response = new StringBuilder();
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                response.append(line).append("\n"); // Add newline character between questions
+            }
+
+            reader.close();
+            connection.disconnect();
+
+            // Store the response in a file
+            String fileName = "src/questions.txt";
+            BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+            writer.write(response.toString());
+            writer.close();
+
+            System.out.println("Questions stored in " + fileName);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private static QuizQuestion[] loadQuestionsFromFile(String fileName) {
         try {
             Scanner fileScanner = new Scanner(new File(fileName));
-            int numberOfQuestions = countLines(fileName);
+            int numberOfQuestions = 0;
+
+            while (fileScanner.hasNextLine()) {
+                fileScanner.nextLine();
+                numberOfQuestions++;
+            }
+
+            fileScanner.close();
+
             QuizQuestion[] questions = new QuizQuestion[numberOfQuestions];
+            fileScanner = new Scanner(new File(fileName));
 
             for (int i = 0; i < numberOfQuestions; i++) {
-                String line = fileScanner.nextLine();
+                String line = fileScanner.nextLine().trim();
                 String[] parts = line.split(";");
                 String question = parts[0];
                 String[] options = parts[1].split(",");
-                int correctOption = Integer.parseInt(parts[2]);
+
+                String correctOptionString = parts[2].replaceAll("\\D", "");
+                int correctOption = Integer.parseInt(correctOptionString);
 
                 questions[i] = new QuizQuestion(question, options, correctOption);
             }
 
+
+            fileScanner.close();
             return questions;
         } catch (FileNotFoundException e) {
             System.out.println("File not found: " + fileName);
             return new QuizQuestion[0];
         }
     }
-
-    private static int countLines(String fileName) {
-        try {
-            Scanner fileScanner = new Scanner(new File(fileName));
-            int count = 0;
-
-            while (fileScanner.hasNextLine()) {
-                fileScanner.nextLine();
-                count++;
-            }
-
-            fileScanner.close();
-            return count;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
 }
-
-class QuizQuestion extends Thread {
+class
+QuizQuestion extends Thread {
     private String question;
     private String[] options;
     private int correctOption;
