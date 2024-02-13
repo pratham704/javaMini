@@ -1,3 +1,1 @@
-What is the capital of France?;Berlin,Paris,Madrid;2 \n
-Which planet is known as the Red Planet?;Earth,Mars,Jupiter;2 \n
-What is the largest mammal?;Elephant,Whale,Lion;2 \n
+
