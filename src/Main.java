@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        String apiUrl = "http://localhost:8080/data/questions";
+        String apiUrl = "https://java-final-project-docker.onrender.com/data/questions";
 
         fetchAndStoreQuestions(apiUrl);
 
